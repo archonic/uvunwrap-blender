@@ -11,9 +11,12 @@ density.
 
 ## Install
 
-Blender 4.2 or later. Download the zip for your platform from the
+Blender 4.2 or later. Download the zip for your platform (Windows x64,
+macOS Apple Silicon or Intel, Linux x64 or ARM64) from the
 [releases](https://github.com/archonic/uvunwrap-blender/releases), then in
 Blender: **Edit → Preferences → Get Extensions → ⌄ → Install from Disk**.
+(extensions.blender.org doesn't list Linux ARM64, so that zip is only on
+the releases page.)
 
 ## Use
 
@@ -45,8 +48,7 @@ Quads and n-gons stay whole, and marked seams become chart boundaries.
 ## Development
 
 ```sh
-python scripts/fetch_wheels.py      # the uvunwrap wheels into extension/wheels
-blender --command extension build --source-dir extension --output-dir dist --split-platforms
+python scripts/build.py             # wheels from PyPI, then the checked zips in dist/
 blender -b --factory-startup --python-exit-code 1 \
     --python tests/test_extension.py -- --wheels <dir with the uvunwrap package>
 ```

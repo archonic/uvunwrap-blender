@@ -24,27 +24,32 @@ this file or the README.
 ## Layout
 
 - `extension/`: the extension (the zip's content). `blender_manifest.toml`
-  (id `uvunwrap`, platforms, the wheel per platform), `__init__.py`
+  (id `uvunwrap`, the platforms extensions.blender.org accepts, the wheel
+  per platform), `__init__.py`
   (settings shared by the scene and the operator, operator, sidebar panel,
   UV menu entry), `mesh_io.py` (mesh → `uvunwrap.Mesh`, results → UV map;
   world space, edit-mode selection as `ignored_faces`, page fit to a square
   image, extra pages as UDIM tiles).
-- `extension/wheels/`: downloaded by `scripts/fetch_wheels.py` from the
-  names in the manifest (gitignored).
+- `scripts/build.py`: the one build, used by CI and releases. Downloads the
+  wheels (`extension/wheels/`, gitignored), builds the site zips (split by
+  the manifest's platforms) and the GitHub-only `linux-arm64` zip (from a
+  copy whose manifest names only that platform; extensions.blender.org
+  rejects any zip whose manifest lists it), then checks every zip's
+  platforms and wheels.
 - `docs/`: the listing description (`listing.md`, pasted into
   extensions.blender.org) and screenshots, regenerated with
   `scripts/screenshots.py` (needs the UI; see its docstring).
 - `tests/test_extension.py`: run inside Blender, from this checkout
   (`-- --wheels DIR`) or against the installed extension.
 - `.github/workflows/ci.yml`: builds the zips with Blender 5.2, installs the
-  Linux one and runs the tests on Blender 4.2 LTS and 5.2.
+  Linux x64 one and runs the tests on Blender 4.2 LTS and 5.2.
+  `release.yml`: on a published release tagged `v<manifest version>`,
+  builds the zips and attaches them.
 
 ## Commands
 
-- `python scripts/fetch_wheels.py`
-- `blender --command extension validate extension`
-- `mkdir -p dist && blender --command extension build --source-dir extension
-  --output-dir dist --split-platforms` (the output directory must exist).
+- `python scripts/build.py` (Python 3.11+, `blender` on PATH): the zips in
+  `dist/`, checked.
 - Tests from the checkout: `blender -b --factory-startup --python-exit-code 1
   --python tests/test_extension.py -- --wheels DIR`, `DIR` holding the
   `uvunwrap` package (`pip install --target DIR uvunwrap`).
@@ -59,5 +64,9 @@ this file or the README.
   `Co-Authored-By` or other AI attribution trailers. Small commits, each
   passing the tests on its own.
 - New uvunwrap versions: update the wheel names in the manifest (version
-  and tags) and run `scripts/fetch_wheels.py`.
+  and tags); `scripts/build.py` derives the linux-arm64 wheel's name.
+- Never drop a platform without the maintainer's approval; a platform the
+  site rejects goes in `GITHUB_ONLY` in `scripts/build.py`.
+- Releases: bump `version` in the manifest, then publish a GitHub release
+  tagged `v<version>`; upload its non-`linux_arm64` zips to the site.
 - Every source file starts with `# SPDX-License-Identifier: GPL-3.0-or-later`.
