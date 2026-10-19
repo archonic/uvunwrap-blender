@@ -1,0 +1,30 @@
+name: Blender
+description: Downloads (and caches) a Linux x64 Blender release and puts it on PATH.
+inputs:
+  version:
+    description: Blender version, e.g. 5.2.2
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Libraries Blender needs on a headless runner
+      shell: bash
+      run: |
+        sudo apt-get update -qq
+        sudo apt-get install -y -qq libxi6 libxkbcommon0 libxrender1 libxxf86vm1 libxfixes3 libsm6 libgl1 libegl1 > /dev/null
+    - uses: actions/cache@v5
+      id: cache
+      with:
+        path: ${{ runner.temp }}/blender-${{ inputs.version }}-linux-x64
+        key: blender-${{ inputs.version }}-linux-x64
+    - name: Download Blender ${{ inputs.version }}
+      if: steps.cache.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        v="${{ inputs.version }}"
+        curl -fsSL "https://download.blender.org/release/Blender${v%.*}/blender-$v-linux-x64.tar.xz" | tar -xJ -C "$RUNNER_TEMP"
+    - name: Put Blender on PATH
+      shell: bash
+      run: |
+        echo "$RUNNER_TEMP/blender-${{ inputs.version }}-linux-x64" >> "$GITHUB_PATH"
+        "$RUNNER_TEMP/blender-${{ inputs.version }}-linux-x64/blender" --version | head -1

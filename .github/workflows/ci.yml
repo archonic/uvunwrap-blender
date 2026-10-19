@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    name: Build the extension
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - name: Fetch the uvunwrap wheels
+        run: python scripts/fetch_wheels.py
+      - uses: ./.github/actions/blender
+        with:
+          version: "5.2.2"
+      - name: Validate and build one zip per platform
+        run: |
+          blender --command extension validate extension
+          mkdir -p dist
+          blender --command extension build --source-dir extension --output-dir dist --split-platforms
+          ls -l dist
+      - uses: actions/upload-artifact@v7
+        with:
+          name: extension
+          path: dist
+
+  test:
+    name: Test (Blender ${{ matrix.blender }})
+    needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        # The oldest supported version and the current one.
+        blender: ["4.2.23", "5.2.2"]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          name: extension
+          path: dist
+      - uses: ./.github/actions/blender
+        with:
+          version: ${{ matrix.blender }}
+      - name: Install the Linux zip and run the tests
+        run: |
+          export BLENDER_USER_RESOURCES="$RUNNER_TEMP/blender-user"
+          blender --command extension install-file -r user_default -e dist/uvunwrap-*-linux_x64.zip
+          blender -b --factory-startup --python-exit-code 1 --python tests/test_extension.py
