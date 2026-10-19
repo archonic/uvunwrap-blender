@@ -1,10 +1,13 @@
 # uvunwrap for Blender
 
 Automatic UV unwrapping for lightmaps, baking and texture atlases, powered by
-[uvunwrap](https://github.com/archonic/uvunwrap) (Rust). Compared with
-Blender's Smart UV Project + Pack Islands and Lightmap Pack on the same
-models, it packs 1–17 points denser, runs 20–1000× faster, and never folds
-or overlaps triangles; every chart keeps a uniform texel density.
+[uvunwrap](https://github.com/archonic/uvunwrap) (Rust). On six standard
+test models it packs 1–17 percentage points more of the page than Blender's
+Smart UV Project + Pack Islands at the same padding and runs 21–350× faster;
+it never folds or overlaps triangles, and every chart keeps a uniform texel
+density.
+
+![uvunwrap in Blender's UV Editing workspace](docs/uv_editing.png)
 
 ## Install
 
