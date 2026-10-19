@@ -1,5 +1,8 @@
-# Builds the platform zips for a published GitHub release and attaches
-# them to it. The release tag must be v<manifest version>.
+# Builds the platform zips for a published GitHub release, attaches them to
+# it and uploads the site zips to extensions.blender.org. The release tag
+# must be v<manifest version>. The upload needs the repository secret
+# BLENDER_EXTENSIONS_TOKEN (an API token from extensions.blender.org) and is
+# skipped without it, and for pre-releases (to rehearse a release).
 name: Release
 
 on:
@@ -11,8 +14,10 @@ permissions:
 
 jobs:
   zips:
-    name: Attach the extension zips
+    name: Attach and upload the extension zips
     runs-on: ubuntu-latest
+    env:
+      HAS_EXTENSIONS_TOKEN: ${{ secrets.BLENDER_EXTENSIONS_TOKEN != '' }}
     steps:
       - uses: actions/checkout@v7
       - name: The tag matches the manifest version
@@ -32,3 +37,14 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh release upload "${{ github.event.release.tag_name }}" dist/*.zip --clobber
+      - name: Upload to extensions.blender.org
+        if: env.HAS_EXTENSIONS_TOKEN == 'true' && !github.event.release.prerelease
+        env:
+          BLENDER_EXTENSIONS_TOKEN: ${{ secrets.BLENDER_EXTENSIONS_TOKEN }}
+          RELEASE_NOTES: ${{ github.event.release.body }}
+        run: python scripts/upload.py
+      - name: Upload to extensions.blender.org (skipped)
+        if: env.HAS_EXTENSIONS_TOKEN != 'true' || github.event.release.prerelease
+        run: |
+          echo "Not uploading to extensions.blender.org: ${{ github.event.release.prerelease && 'this is a pre-release' || 'the BLENDER_EXTENSIONS_TOKEN secret is not set' }}."
+          python scripts/upload.py --dry-run

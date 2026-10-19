@@ -53,6 +53,11 @@ blender -b --factory-startup --python-exit-code 1 \
     --python tests/test_extension.py -- --wheels <dir with the uvunwrap package>
 ```
 
+Releases: bump `version` in `extension/blender_manifest.toml` and publish a
+GitHub release tagged `v<version>`. CI builds and attaches the zips and, with
+the `BLENDER_EXTENSIONS_TOKEN` secret set, uploads them to
+extensions.blender.org (`scripts/upload.py`; pre-releases skip the upload).
+
 The tests run inside Blender. With `--wheels` (e.g. an unpacked wheel, or a
 `pip install --target` directory) they load the extension from this
 checkout; without it, the installed extension (`bl_ext.user_default.uvunwrap`).

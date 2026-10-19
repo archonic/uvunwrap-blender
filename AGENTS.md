@@ -36,6 +36,13 @@ this file or the README.
   copy whose manifest names only that platform; extensions.blender.org
   rejects any zip whose manifest lists it), then checks every zip's
   platforms and wheels.
+- `scripts/upload.py`: uploads `dist/`'s site zips (not the GitHub-only
+  ones) to the extensions.blender.org API
+  (`/api/v1/extensions/<id>/versions/upload/`, `Authorization: Bearer`,
+  form field `version_file`): the first zip of a version creates it, the
+  rest add platforms. Checks every zip first; `--dry-run` needs no token or
+  network. Token from `BLENDER_EXTENSIONS_TOKEN`. The extension's very
+  first upload must go through the web form.
 - `docs/`: the listing description (`listing.md`, pasted into
   extensions.blender.org) and screenshots, regenerated with
   `scripts/screenshots.py` (needs the UI; see its docstring).
@@ -44,7 +51,9 @@ this file or the README.
 - `.github/workflows/ci.yml`: builds the zips with Blender 5.2, installs the
   Linux x64 one and runs the tests on Blender 4.2 LTS and 5.2.
   `release.yml`: on a published release tagged `v<manifest version>`,
-  builds the zips and attaches them.
+  builds the zips, attaches them and runs `scripts/upload.py` (only with
+  the `BLENDER_EXTENSIONS_TOKEN` secret, and not for pre-releases, which
+  rehearse a release without uploading).
 
 ## Commands
 
@@ -68,5 +77,9 @@ this file or the README.
 - Never drop a platform without the maintainer's approval; a platform the
   site rejects goes in `GITHUB_ONLY` in `scripts/build.py`.
 - Releases: bump `version` in the manifest, then publish a GitHub release
-  tagged `v<version>`; upload its non-`linux_arm64` zips to the site.
+  tagged `v<version>` (its text becomes the site's release notes). CI
+  uploads to the site; never upload to extensions.blender.org from tests or
+  by hand without the maintainer's go-ahead.
+- `python -m unittest tests/test_upload.py`: the upload script against a
+  local stand-in server.
 - Every source file starts with `# SPDX-License-Identifier: GPL-3.0-or-later`.
