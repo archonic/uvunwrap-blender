@@ -1,4 +1,4 @@
-# Builds the platform zips for a published GitHub release and attaches
+# Builds the five platform zips for a published GitHub release and attaches
 # them to it. The release tag must be v<manifest version>.
 name: Release
 
