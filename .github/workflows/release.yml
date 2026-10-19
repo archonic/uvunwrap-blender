@@ -1,0 +1,39 @@
+# Builds the five platform zips for a published GitHub release and attaches
+# them to it. The release tag must be v<manifest version>.
+name: Release
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  zips:
+    name: Attach the extension zips
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: The tag matches the manifest version
+        run: |
+          version=$(sed -n 's/^version = "\(.*\)"/\1/p' extension/blender_manifest.toml)
+          test "${{ github.event.release.tag_name }}" = "v$version" || {
+            echo "release tag ${{ github.event.release.tag_name }} != v$version (manifest)"; exit 1; }
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - name: Fetch the uvunwrap wheels
+        run: python scripts/fetch_wheels.py
+      - uses: ./.github/actions/blender
+        with:
+          version: "5.2.2"
+      - name: Validate and build one zip per platform
+        run: |
+          blender --command extension validate extension
+          mkdir -p dist
+          blender --command extension build --source-dir extension --output-dir dist --split-platforms
+      - name: Attach the zips to the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "${{ github.event.release.tag_name }}" dist/*.zip --clobber
