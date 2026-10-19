@@ -1,5 +1,14 @@
 <!-- Description for the extensions.blender.org listing (paste into the
-     form). Keep claims to what docs/ and the uvunwrap repo can back up. -->
+     form). Keep claims to what docs/ and the uvunwrap repo can back up.
+     Images (no Blender logo anywhere, ToS 2.2):
+     - Icon (exactly 256 x 256 PNG): icon.png, from icon.svg
+       (rsvg-convert -w 256 -h 256 icon.svg -o icon.png).
+     - Featured image (at least 1920 x 1080, 16:9): featured.png, the
+       screenshot capture with the menu bar cropped off.
+     - Previews (at least one): featured.png ("The UV Editing workspace after
+       an unwrap: the packed layout, the models textured through it, and the
+       uvunwrap panel") and layout.png ("The packed atlas: small charts nest
+       inside the torus rings"). -->
 
 **uvunwrap** creates clean, non-overlapping UVs for lightmaps, baking and
 texture atlases, automatically and in seconds.
