@@ -31,6 +31,9 @@ this file or the README.
   image, extra pages as UDIM tiles).
 - `extension/wheels/`: downloaded by `scripts/fetch_wheels.py` from the
   names in the manifest (gitignored).
+- `docs/`: the listing description (`listing.md`, pasted into
+  extensions.blender.org) and screenshots, regenerated with
+  `scripts/screenshots.py` (needs the UI; see its docstring).
 - `tests/test_extension.py`: run inside Blender, from this checkout
   (`-- --wheels DIR`) or against the installed extension.
 - `.github/workflows/ci.yml`: builds the zips with Blender 5.2, installs the
